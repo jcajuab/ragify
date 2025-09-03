@@ -1,0 +1,36 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
+  "files": {
+    "includes": ["**", "!pnpm-lock.yaml"]
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "linter": {
+    "rules": {
+      "a11y": {
+        "useSemanticElements": "warn"
+      },
+      "correctness": {
+        "useUniqueElementIds": "off"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "warn",
+          "fix": "safe",
+          "options": {
+            "functions": ["cva"]
+          }
+        }
+      },
+      "suspicious": {
+        "noUnknownAtRules": "off"
+      }
+    }
+  },
+  "formatter": {
+    "useEditorconfig": true
+  }
+}

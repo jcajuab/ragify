@@ -1,0 +1,22 @@
+{
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+
+  // Biome
+  "biome.suggestInstallingGlobally": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit"
+  },
+  "editor.defaultFormatter": "biomejs.biome",
+
+  // Lucide
+  "typescript.preferences.autoImportFileExcludePatterns": ["lucide-react"],
+
+  // Tailwind CSS
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}
