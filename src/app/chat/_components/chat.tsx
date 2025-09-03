@@ -4,7 +4,7 @@ import { type UIMessage, useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { PaperclipIcon } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   Conversation,
   ConversationContent,
@@ -49,26 +49,23 @@ export function Chat({ chatId, title, initialMessages }: ChatProps) {
     }),
   })
 
+  const lastProcessedChatId = useRef<string | null>(null)
+
   const searchParams = useSearchParams()
   const router = useRouter()
 
   useEffect(() => {
     const initialMessage = searchParams.get("initialMessage")
-    if (initialMessage && messages.length === initialMessages.length) {
+
+    if (initialMessage && lastProcessedChatId.current !== chatId) {
+      lastProcessedChatId.current = chatId
       sendMessage({ text: initialMessage })
 
       const newSearchParams = new URLSearchParams(searchParams)
       newSearchParams.delete("initialMessage")
       router.replace(`/chat/${chatId}`)
     }
-  }, [
-    chatId,
-    initialMessages.length,
-    messages.length,
-    router.replace,
-    searchParams,
-    sendMessage,
-  ])
+  }, [chatId, searchParams, sendMessage, router])
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(event.target.value)
