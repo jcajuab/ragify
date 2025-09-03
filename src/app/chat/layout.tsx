@@ -1,7 +1,7 @@
-import { Sidebar } from "@/app/chat/_components/sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { Sidebar } from "@/app/chat/_components/sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
 
-export default function Layout({ children }: LayoutProps<"/">) {
+export default async function Layout({ children }: LayoutProps<"/">) {
   return (
     <SidebarProvider
       style={
@@ -14,5 +14,5 @@ export default function Layout({ children }: LayoutProps<"/">) {
       <Sidebar />
       {children}
     </SidebarProvider>
-  );
+  )
 }

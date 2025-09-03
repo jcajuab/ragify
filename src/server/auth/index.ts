@@ -1,7 +1,7 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "@/server/db";
-import { env } from "@/server/env";
+import { betterAuth } from "better-auth"
+import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import { db } from "@/server/db"
+import { env } from "@/server/env"
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -22,4 +22,4 @@ export const auth = betterAuth({
       generateId: false,
     },
   },
-});
+})

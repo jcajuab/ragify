@@ -1,5 +1,14 @@
-import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { nanoid } from "nanoid";
+import type { UIMessage } from "ai"
+import { generateId } from "ai"
+import {
+  boolean,
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core"
+import { nanoid } from "nanoid"
 
 export const users = pgTable("users", {
   id: text()
@@ -13,7 +22,7 @@ export const users = pgTable("users", {
   image: text(),
   createdAt: timestamp().notNull(),
   updatedAt: timestamp().notNull(),
-});
+})
 
 export const sessions = pgTable(
   "sessions",
@@ -32,7 +41,7 @@ export const sessions = pgTable(
     updatedAt: timestamp().notNull(),
   },
   (table) => [index().on(table.userId), index().on(table.token)],
-);
+)
 
 export const accounts = pgTable(
   "accounts",
@@ -56,7 +65,7 @@ export const accounts = pgTable(
     updatedAt: timestamp().notNull(),
   },
   (table) => [index().on(table.userId)],
-);
+)
 
 export const verifications = pgTable(
   "verifications",
@@ -71,4 +80,37 @@ export const verifications = pgTable(
     updatedAt: timestamp(),
   },
   (table) => [index().on(table.identifier)],
-);
+)
+
+export const chats = pgTable(
+  "chats",
+  {
+    id: text()
+      .primaryKey()
+      .$default(() => generateId()),
+    userId: text()
+      .notNull()
+      .references(() => users.id),
+    title: text().notNull(),
+    createdAt: timestamp().notNull().defaultNow(),
+  },
+  (table) => [index().on(table.userId)],
+)
+
+export const messages = pgTable(
+  "messages",
+  {
+    id: text()
+      .primaryKey()
+      .$default(() => generateId()),
+    chatId: text()
+      .notNull()
+      .references(() => chats.id),
+    role: text().notNull().$type<UIMessage["role"]>(),
+
+    // FIXME: This is for the MVP only
+    parts: jsonb().notNull().$type<UIMessage["parts"]>(),
+    createdAt: timestamp().notNull().defaultNow(),
+  },
+  (table) => [index().on(table.chatId), index().on(table.createdAt)],
+)

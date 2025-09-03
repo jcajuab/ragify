@@ -1,5 +1,5 @@
-import { defineConfig } from "drizzle-kit";
-import { env } from "@/server/env";
+import { defineConfig } from "drizzle-kit"
+import { env } from "@/server/env"
 
 export default defineConfig({
   dialect: "postgresql",
@@ -9,4 +9,4 @@ export default defineConfig({
     url: env.POSTGRES_URL,
   },
   casing: "snake_case",
-});
+})

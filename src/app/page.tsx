@@ -1,10 +1,10 @@
-import { redirect } from "next/navigation";
-import { LoginForm } from "@/app/_components/login-form";
-import { getSession } from "@/server/auth/utils";
+import { redirect } from "next/navigation"
+import { LoginForm } from "@/app/_components/login-form"
+import { getSession } from "@/server/auth/utils"
 
 export default async function Page() {
-  const session = await getSession();
-  if (session) redirect("/chat/new");
+  const session = await getSession()
+  if (session) redirect("/chat/new")
 
   return (
     <main className="relative isolate flex min-h-svh flex-col items-center justify-center p-4">
@@ -19,5 +19,5 @@ export default async function Page() {
         <LoginForm />
       </div>
     </main>
-  );
+  )
 }

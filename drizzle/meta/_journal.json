@@ -15,6 +15,13 @@
       "when": 1756917197097,
       "tag": "0001_large_the_twelve",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756923525971,
+      "tag": "0002_free_hairball",
+      "breakpoints": true
     }
   ]
 }

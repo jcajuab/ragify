@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { BotIcon } from "lucide-react";
-import Image from "next/image";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { authClient } from "@/lib/authClient";
+import { BotIcon } from "lucide-react"
+import Image from "next/image"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import { authClient } from "@/lib/authClient"
 
 export function LoginForm() {
   const handleClick = async () => {
@@ -18,8 +18,8 @@ export function LoginForm() {
         success: "Signed in successfully!",
         error: "Oops! Something went wrong.",
       },
-    );
-  };
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -46,5 +46,5 @@ export function LoginForm() {
         Continue with GitHub
       </Button>
     </div>
-  );
+  )
 }
