@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import { getChat } from "@/app/chat/_actions/get-chat"
-import { loadMessages } from "@/app/chat/_actions/load-messages"
+import { getMessages } from "@/app/chat/_actions/get-messages"
 import { Chat } from "@/app/chat/_components/chat"
 import { getSession } from "@/server/auth/utils"
 
@@ -13,7 +13,7 @@ export default async function Page({ params }: PageProps<"/chat/[chatId]">) {
   const chat = await getChat(chatId)
   if (!chat) notFound()
 
-  const messages = await loadMessages(chat.id)
+  const messages = await getMessages(chat.id)
 
-  return <Chat chatId={chat.id} title={chat.title} initialMessages={messages} />
+  return <Chat chat={chat} initialMessages={messages} />
 }

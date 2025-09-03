@@ -15,6 +15,5 @@ export async function createChat(title: string): Promise<string> {
     .returning()
 
   revalidatePath("/chat")
-
   return chat.id
 }

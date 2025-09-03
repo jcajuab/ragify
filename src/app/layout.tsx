@@ -17,7 +17,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
     <html lang="en" className={cn("dark antialiased", inter.className)}>
       <body>
         {children}
-        <Toaster expand richColors />
+        <Toaster richColors />
       </body>
     </html>
   )

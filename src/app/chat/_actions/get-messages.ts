@@ -6,7 +6,7 @@ import { getSession } from "@/server/auth/utils"
 import { db } from "@/server/db"
 import * as schema from "@/server/db/schema"
 
-export async function loadMessages(chatId: string): Promise<UIMessage[]> {
+export async function getMessages(chatId: string): Promise<UIMessage[]> {
   const session = await getSession()
   if (!session) throw new Error("Unauthorized!")
 

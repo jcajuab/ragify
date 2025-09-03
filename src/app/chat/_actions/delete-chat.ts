@@ -1,16 +1,15 @@
 "use server"
 
 import { eq } from "drizzle-orm"
+import { revalidatePath } from "next/cache"
 import { getSession } from "@/server/auth/utils"
 import { db } from "@/server/db"
 import * as schema from "@/server/db/schema"
 
-export async function getChats() {
+export async function deleteChat(chatId: string) {
   const session = await getSession()
   if (!session) throw new Error("Unauthorized!")
 
-  return await db
-    .select()
-    .from(schema.chats)
-    .where(eq(schema.chats.userId, session.user.id))
+  await db.delete(schema.chats).where(eq(schema.chats.id, chatId))
+  revalidatePath("/chat")
 }

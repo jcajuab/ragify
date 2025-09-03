@@ -4,10 +4,7 @@ import { LogOutIcon, SquarePenIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
-import { getChats } from "@/app/chat/_actions/get-chats"
-import { Loader } from "@/components/ai-elements/loader"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -27,29 +24,19 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { authClient } from "@/lib/authClient"
+import type { Chat } from "@/server/db/types"
 
-export function Sidebar(props: React.ComponentProps<typeof __Sidebar>) {
+type SidebarProps = {
+  chats: Chat[]
+}
+
+export function Sidebar({ chats }: SidebarProps) {
   const router = useRouter()
   const { data } = authClient.useSession()
-
-  const [chats, setChats] = useState<Awaited<ReturnType<typeof getChats>>>([])
-  const [isPending, startTransition] = useTransition()
 
   const pathname = usePathname()
   const currentChatId =
     pathname?.startsWith("/chat/") && pathname.split("/chat/")[1]?.split("?")[0]
-
-  useEffect(() => {
-    startTransition(async () => {
-      try {
-        const result = await getChats()
-        setChats(result)
-      } catch (error) {
-        console.log(error)
-        toast.error("Failed to fetch chat history.")
-      }
-    })
-  }, [])
 
   const handleLogout = async () => {
     toast.promise(authClient.signOut(), {
@@ -58,12 +45,12 @@ export function Sidebar(props: React.ComponentProps<typeof __Sidebar>) {
         router.push("/")
         return "Signed out successfully!"
       },
-      error: "Oops! Something went wrong.",
+      error: "Uh oh, something went wrong. Try again later!",
     })
   }
 
   return (
-    <__Sidebar collapsible="offcanvas" {...props}>
+    <__Sidebar collapsible="offcanvas">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -99,20 +86,13 @@ export function Sidebar(props: React.ComponentProps<typeof __Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarMenu>
-            {isPending ? (
-              <Loader />
-            ) : (
-              chats.map((chat) => (
-                <SidebarMenuItem key={chat.id}>
-                  <SidebarMenuButton
-                    isActive={currentChatId === chat.id}
-                    asChild
-                  >
-                    <Link href={`/chat/${chat.id}`}>{chat.title}</Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))
-            )}
+            {chats.map((chat) => (
+              <SidebarMenuItem key={chat.id}>
+                <SidebarMenuButton isActive={currentChatId === chat.id} asChild>
+                  <Link href={`/chat/${chat.id}`}>{chat.title}</Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
@@ -141,8 +121,9 @@ export function Sidebar(props: React.ComponentProps<typeof __Sidebar>) {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
+                align="center"
                 side="top"
-                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                className="w-(--radix-dropdown-menu-trigger-width)"
               >
                 <DropdownMenuItem
                   variant="destructive"

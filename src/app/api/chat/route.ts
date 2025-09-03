@@ -7,7 +7,7 @@ import {
   streamText,
   type UIMessage,
 } from "ai"
-import { loadMessages } from "@/app/chat/_actions/load-messages"
+import { getMessages } from "@/app/chat/_actions/get-messages"
 import { upsertMessage } from "@/app/chat/_actions/upsert-message"
 import { getSession } from "@/server/auth/utils"
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   await upsertMessage(chatId, message)
 
-  const newMessages = await loadMessages(chatId)
+  const newMessages = await getMessages(chatId)
   const stream = createUIMessageStream({
     originalMessages: newMessages,
     execute: ({ writer }) => {
@@ -45,6 +45,9 @@ export async function POST(request: Request) {
       const result = streamText({
         model,
         messages: convertToModelMessages(newMessages),
+        system: `You are a helpful assistant. Check your knowledge base before answering any questions.
+          Only respond to questions using information from tool calls.
+          if no relevant information is found in the tool calls, respond, "Sorry, I don't know."`,
       })
 
       result.consumeStream()

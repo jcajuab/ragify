@@ -2,9 +2,11 @@
 
 import { type UIMessage, useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
-import { PaperclipIcon } from "lucide-react"
+import { EllipsisIcon, PaperclipIcon, TrashIcon } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
+import { deleteChat } from "@/app/chat/_actions/delete-chat"
 import {
   Conversation,
   ConversationContent,
@@ -20,20 +22,26 @@ import {
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input"
 import { Response } from "@/components/ai-elements/response"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import type { Chat as ChatType } from "@/server/db/types"
 
 type ChatProps = {
-  // FIXME: Optimize props by passing the whole `chat` object
-  chatId: string
-  title: string
+  chat: ChatType
   initialMessages: UIMessage[]
 }
 
-export function Chat({ chatId, title, initialMessages }: ChatProps) {
+export function Chat({ chat, initialMessages }: ChatProps) {
   const [text, setText] = useState<string>("")
   const { messages, sendMessage } = useChat({
-    id: chatId,
+    id: chat.id,
     messages: initialMessages,
     transport: new DefaultChatTransport({
       api: "/api/chat",
@@ -42,7 +50,7 @@ export function Chat({ chatId, title, initialMessages }: ChatProps) {
         return {
           body: {
             message: lastMessage,
-            chatId,
+            chatId: chat.id,
           },
         }
       },
@@ -57,24 +65,35 @@ export function Chat({ chatId, title, initialMessages }: ChatProps) {
   useEffect(() => {
     const initialMessage = searchParams.get("initialMessage")
 
-    if (initialMessage && lastProcessedChatId.current !== chatId) {
-      lastProcessedChatId.current = chatId
+    if (initialMessage && lastProcessedChatId.current !== chat.id) {
+      lastProcessedChatId.current = chat.id
       sendMessage({ text: initialMessage })
 
       const newSearchParams = new URLSearchParams(searchParams)
       newSearchParams.delete("initialMessage")
-      router.replace(`/chat/${chatId}`)
+      router.replace(`/chat/${chat.id}`)
     }
-  }, [chatId, searchParams, sendMessage, router])
+  }, [chat.id, searchParams, sendMessage, router])
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(event.target.value)
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     sendMessage({ text })
     setText("")
+  }
+
+  const handleDelete = () => {
+    toast.promise(deleteChat(chat.id), {
+      loading: `Deleting ${chat.title}...`,
+      success: () => {
+        router.push("/chat/new")
+        return "Deleted successfully!"
+      },
+      error: "Uh oh, something went wrong. Try again later!",
+    })
   }
 
   return (
@@ -85,35 +104,50 @@ export function Chat({ chatId, title, initialMessages }: ChatProps) {
           orientation="vertical"
           className="mr-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="font-medium">{title}</h1>
+        <h1 className="font-medium">{chat.title}</h1>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="ml-auto" asChild>
+            <Button size="icon" variant="ghost">
+              <EllipsisIcon className="size-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="bottom">
+            <DropdownMenuItem
+              variant="destructive"
+              className="cursor-pointer"
+              onClick={handleDelete}
+            >
+              <TrashIcon />
+              <span>Delete</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
 
-      <div className="relative mx-auto w-full max-w-3xl flex-1 overflow-y-auto p-4">
-        <Conversation>
-          <ConversationContent>
-            {messages.map((message) => (
-              <Message key={message.id} from={message.role}>
-                <MessageContent>
-                  {message.parts.map((part, index) => {
-                    switch (part.type) {
-                      case "text":
-                        return (
-                          <Response key={`${message.id}-${index}`}>
-                            {part.text}
-                          </Response>
-                        )
-                      default:
-                        console.log(part.type)
-                        return null
-                    }
-                  })}
-                </MessageContent>
-              </Message>
-            ))}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
-      </div>
+      <Conversation className="relative mx-auto w-full max-w-3xl">
+        <ConversationContent>
+          {messages.map((message) => (
+            <Message key={message.id} from={message.role}>
+              <MessageContent>
+                {message.parts.map((part, index) => {
+                  switch (part.type) {
+                    case "text":
+                      return (
+                        <Response key={`${message.id}-${index}`}>
+                          {part.text}
+                        </Response>
+                      )
+                    default:
+                      console.log(part.type)
+                      return null
+                  }
+                })}
+              </MessageContent>
+            </Message>
+          ))}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
       <div className="mx-auto w-full max-w-3xl p-4">
         <PromptInput onSubmit={handleSubmit}>
