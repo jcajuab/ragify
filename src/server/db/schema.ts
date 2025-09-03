@@ -90,7 +90,7 @@ export const chats = pgTable(
       .$default(() => generateId()),
     userId: text()
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     title: text().notNull(),
     createdAt: timestamp().notNull().defaultNow(),
   },
@@ -105,7 +105,7 @@ export const messages = pgTable(
       .$default(() => generateId()),
     chatId: text()
       .notNull()
-      .references(() => chats.id),
+      .references(() => chats.id, { onDelete: "cascade" }),
     role: text().notNull().$type<UIMessage["role"]>(),
 
     // FIXME: This is for the MVP only
