@@ -7,9 +7,10 @@ import {
   streamText,
   type UIMessage,
 } from "ai"
-import { getMessages } from "@/app/chat/_actions/get-messages"
-import { upsertMessage } from "@/app/chat/_actions/upsert-message"
 import { getSession } from "@/server/auth/utils"
+import { db } from "@/server/db"
+import * as schema from "@/server/db/schema"
+import { listMessages } from "@/server/queries/list-messages"
 
 export const maxDuration = 30
 
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
 
   await upsertMessage(chatId, message)
 
-  const newMessages = await getMessages(chatId)
+  const newMessages = await listMessages(chatId)
   const stream = createUIMessageStream({
     originalMessages: newMessages,
     execute: ({ writer }) => {
@@ -66,4 +67,22 @@ export async function POST(request: Request) {
   })
 
   return createUIMessageStreamResponse({ stream })
+}
+
+export async function upsertMessage(chatId: string, message: UIMessage) {
+  await db.transaction(async (tx) => {
+    await tx
+      .insert(schema.messages)
+      .values({
+        chatId,
+        ...message,
+      })
+      .onConflictDoUpdate({
+        target: schema.messages.id,
+        set: {
+          parts: message.parts,
+          createdAt: new Date(),
+        },
+      })
+  })
 }

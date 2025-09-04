@@ -10,6 +10,11 @@ export async function deleteChat(chatId: string) {
   const session = await getSession()
   if (!session) throw new Error("Unauthorized!")
 
-  await db.delete(schema.chats).where(eq(schema.chats.id, chatId))
+  const [{ id }] = await db
+    .delete(schema.chats)
+    .where(eq(schema.chats.id, chatId))
+    .returning({ id: schema.chats.id })
+
   revalidatePath("/chat")
+  return id
 }

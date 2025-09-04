@@ -1,17 +1,24 @@
 "use client"
 
+import { nanoid } from "nanoid"
 import { useRouter } from "next/navigation"
-import { createChat } from "@/app/chat/_actions/create-chat"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { useChatMutation } from "@/hooks/use-chat-mutation"
 
 export function NewChat() {
   const router = useRouter()
+  const { createChat } = useChatMutation()
 
   const handleClick = async () => {
-    const chatId = await createChat("Vorp")
-    router.push(
-      `/chat/${chatId}?initialMessage=${encodeURIComponent("Bogus binted?")}`,
-    )
+    toast.promise(createChat.mutateAsync(`Nanoid chat: ${nanoid()}`), {
+      loading: `Creating chat...`,
+      success: () => {
+        router.push("/chat/new")
+        return "Created successfully!"
+      },
+      error: "Uh oh, something went wrong. Try again later!",
+    })
   }
 
   return <Button onClick={handleClick}>New Chat</Button>

@@ -3,10 +3,9 @@
 import { type UIMessage, useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { EllipsisIcon, PaperclipIcon, TrashIcon } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { toast } from "sonner"
-import { deleteChat } from "@/app/chat/_actions/delete-chat"
 import {
   Conversation,
   ConversationContent,
@@ -31,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { useChatMutation } from "@/hooks/use-chat-mutation"
 import type { Chat as ChatType } from "@/server/db/types"
 
 type ChatProps = {
@@ -39,8 +39,10 @@ type ChatProps = {
 }
 
 export function Chat({ chat, initialMessages }: ChatProps) {
+  const router = useRouter()
   const [text, setText] = useState<string>("")
-  const { messages, sendMessage } = useChat({
+
+  const { messages, sendMessage, status } = useChat({
     id: chat.id,
     messages: initialMessages,
     transport: new DefaultChatTransport({
@@ -57,23 +59,7 @@ export function Chat({ chat, initialMessages }: ChatProps) {
     }),
   })
 
-  const lastProcessedChatId = useRef<string | null>(null)
-
-  const searchParams = useSearchParams()
-  const router = useRouter()
-
-  useEffect(() => {
-    const initialMessage = searchParams.get("initialMessage")
-
-    if (initialMessage && lastProcessedChatId.current !== chat.id) {
-      lastProcessedChatId.current = chat.id
-      sendMessage({ text: initialMessage })
-
-      const newSearchParams = new URLSearchParams(searchParams)
-      newSearchParams.delete("initialMessage")
-      router.replace(`/chat/${chat.id}`)
-    }
-  }, [chat.id, searchParams, sendMessage, router])
+  const { deleteChat } = useChatMutation()
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(event.target.value)
@@ -86,8 +72,8 @@ export function Chat({ chat, initialMessages }: ChatProps) {
   }
 
   const handleDelete = () => {
-    toast.promise(deleteChat(chat.id), {
-      loading: `Deleting ${chat.title}...`,
+    toast.promise(deleteChat.mutateAsync(chat.id), {
+      loading: `Deleting chat...`,
       success: () => {
         router.push("/chat/new")
         return "Deleted successfully!"
@@ -138,7 +124,6 @@ export function Chat({ chat, initialMessages }: ChatProps) {
                         </Response>
                       )
                     default:
-                      console.log(part.type)
                       return null
                   }
                 })}
@@ -158,7 +143,7 @@ export function Chat({ chat, initialMessages }: ChatProps) {
                 <PaperclipIcon />
               </PromptInputButton>
             </PromptInputTools>
-            <PromptInputSubmit status="ready" disabled={!text.trim()} />
+            <PromptInputSubmit status={status} disabled={!text.trim()} />
           </PromptInputToolbar>
         </PromptInput>
       </div>

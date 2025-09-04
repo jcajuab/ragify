@@ -5,7 +5,7 @@ import Image from "next/image"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { authClient } from "@/lib/authClient"
+import { authClient } from "@/lib/auth-client"
 
 export function LoginForm() {
   const handleClick = async () => {

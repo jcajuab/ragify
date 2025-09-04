@@ -5,8 +5,10 @@ import {
   index,
   jsonb,
   pgTable,
+  serial,
   text,
   timestamp,
+  vector,
 } from "drizzle-orm/pg-core"
 import { nanoid } from "nanoid"
 
@@ -113,4 +115,17 @@ export const messages = pgTable(
     createdAt: timestamp().notNull().defaultNow(),
   },
   (table) => [index().on(table.chatId), index().on(table.createdAt)],
+)
+
+export const embeddings = pgTable(
+  "embeddings",
+  {
+    id: serial().primaryKey(),
+    chatId: text()
+      .notNull()
+      .references(() => chats.id, { onDelete: "cascade" }),
+    chunk: text().notNull(),
+    embedding: vector({ dimensions: 1536 }).notNull(),
+  },
+  (table) => [index().using("hnsw", table.embedding.op("vector_cosine_ops"))],
 )

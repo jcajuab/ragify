@@ -9,11 +9,11 @@ export async function createChat(title: string): Promise<string> {
   const session = await getSession()
   if (!session) throw new Error("Unauthorized!")
 
-  const [chat] = await db
+  const [{ id }] = await db
     .insert(schema.chats)
     .values({ userId: session.user.id, title })
-    .returning()
+    .returning({ id: schema.chats.id })
 
   revalidatePath("/chat")
-  return chat.id
+  return id
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { LogOutIcon, SquarePenIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -23,20 +24,27 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { authClient } from "@/lib/authClient"
+import { Skeleton } from "@/components/ui/skeleton"
+import { authClient } from "@/lib/auth-client"
 import type { Chat } from "@/server/db/types"
 
-type SidebarProps = {
-  chats: Chat[]
-}
-
-export function Sidebar({ chats }: SidebarProps) {
+export function Sidebar() {
   const router = useRouter()
   const { data } = authClient.useSession()
-
   const pathname = usePathname()
-  const currentChatId =
-    pathname?.startsWith("/chat/") && pathname.split("/chat/")[1]?.split("?")[0]
+
+  const {
+    data: chats,
+    isLoading,
+    error,
+  } = useQuery<Chat[]>({
+    queryKey: ["chats"],
+    queryFn: async () => {
+      const response = await fetch("/api/chats")
+      if (!response.ok) throw new Error("Failed to fetch chats")
+      return response.json()
+    },
+  })
 
   const handleLogout = async () => {
     toast.promise(authClient.signOut(), {
@@ -55,7 +63,7 @@ export function Sidebar({ chats }: SidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/chat/new">
+              <Link href="/chat/new" replace>
                 <Image
                   src="/assets/robot-emoji-192x192.png"
                   alt="Ragify logo"
@@ -86,13 +94,38 @@ export function Sidebar({ chats }: SidebarProps) {
         <SidebarGroup>
           <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarMenu>
-            {chats.map((chat) => (
-              <SidebarMenuItem key={chat.id}>
-                <SidebarMenuButton isActive={currentChatId === chat.id} asChild>
-                  <Link href={`/chat/${chat.id}`}>{chat.title}</Link>
-                </SidebarMenuButton>
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, index) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: this is fine
+                <SidebarMenuItem key={index}>
+                  <SidebarMenuButton>
+                    <Skeleton className="size-full" />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))
+            ) : error ? (
+              <SidebarMenuItem>
+                <p className="text-muted-foreground text-sm">
+                  Failed to load chats
+                </p>
               </SidebarMenuItem>
-            ))}
+            ) : (
+              chats?.map((chat) => {
+                const isActive =
+                  pathname?.startsWith("/chat/") &&
+                  pathname.split("/chat/")[1]?.split("?")[0] === chat.id
+
+                return (
+                  <SidebarMenuItem key={chat.id}>
+                    <SidebarMenuButton isActive={isActive} asChild>
+                      <Link href={`/chat/${chat.id}`} className="truncate">
+                        {chat.title}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })
+            )}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

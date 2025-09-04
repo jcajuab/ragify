@@ -2,14 +2,10 @@
 
 import type { UIMessage } from "ai"
 import { eq } from "drizzle-orm"
-import { getSession } from "@/server/auth/utils"
 import { db } from "@/server/db"
 import * as schema from "@/server/db/schema"
 
-export async function getMessages(chatId: string): Promise<UIMessage[]> {
-  const session = await getSession()
-  if (!session) throw new Error("Unauthorized!")
-
+export async function listMessages(chatId: string): Promise<UIMessage[]> {
   return await db
     .select()
     .from(schema.messages)
