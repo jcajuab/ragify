@@ -13,8 +13,8 @@ export function NewChat() {
   const handleClick = async () => {
     toast.promise(createChat.mutateAsync(`Nanoid chat: ${nanoid()}`), {
       loading: `Creating chat...`,
-      success: () => {
-        router.push("/chat/new")
+      success: (chatId) => {
+        router.push(`/chat/${chatId}`)
         return "Created successfully!"
       },
       error: "Uh oh, something went wrong. Try again later!",
