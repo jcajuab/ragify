@@ -2,7 +2,7 @@
 
 import { type UIMessage, useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
-import { EllipsisIcon, PaperclipIcon, TrashIcon } from "lucide-react"
+import { EllipsisIcon, TrashIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -14,11 +14,9 @@ import {
 import { Message, MessageContent } from "@/components/ai-elements/message"
 import {
   PromptInput,
-  PromptInputButton,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputToolbar,
-  PromptInputTools,
 } from "@/components/ai-elements/prompt-input"
 import { Response } from "@/components/ai-elements/response"
 import { Button } from "@/components/ui/button"
@@ -137,13 +135,11 @@ export function Chat({ chat, initialMessages }: ChatProps) {
       <div className="mx-auto w-full max-w-3xl p-4">
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputTextarea rows={3} value={text} onChange={handleChange} />
-          <PromptInputToolbar className="border-t">
-            <PromptInputTools>
-              <PromptInputButton disabled>
-                <PaperclipIcon />
-              </PromptInputButton>
-            </PromptInputTools>
-            <PromptInputSubmit status={status} disabled={!text.trim()} />
+          <PromptInputToolbar className="justify-end border-t">
+            <PromptInputSubmit
+              status={status}
+              disabled={!text.trim() && status === "ready"}
+            />
           </PromptInputToolbar>
         </PromptInput>
       </div>
