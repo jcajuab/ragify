@@ -118,8 +118,8 @@ export function Sidebar() {
                 return (
                   <SidebarMenuItem key={chat.id}>
                     <SidebarMenuButton isActive={isActive} asChild>
-                      <Link href={`/chat/${chat.id}`} className="truncate">
-                        {chat.title}
+                      <Link href={`/chat/${chat.id}`}>
+                        <span className="truncate">{chat.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
