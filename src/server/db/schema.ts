@@ -125,7 +125,7 @@ export const embeddings = pgTable(
       .notNull()
       .references(() => chats.id, { onDelete: "cascade" }),
     chunk: text().notNull(),
-    embedding: vector({ dimensions: 1536 }).notNull(),
+    embedding: vector({ dimensions: 768 }).notNull(),
   },
   (table) => [index().using("hnsw", table.embedding.op("vector_cosine_ops"))],
 )

@@ -29,6 +29,13 @@
       "when": 1756927853151,
       "tag": "0003_rich_northstar",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1756972031909,
+      "tag": "0004_dusty_patch",
+      "breakpoints": true
     }
   ]
 }
